@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% block content %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+        <!-- Add Application Button -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="{% url 'add_application' %}" class="btn btn-primary btn-add">
+                <i class="fas fa-plus-circle me-2"></i>เพิ่มผู้สมัครงาน
+            </a>
+            
+            <!-- Search Box -->
+            <form class="d-flex align-items-center" method="GET" action="{% url 'search_application' %}">
+                <button class="search-btn" type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Applications Table -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-primary">
+                        <tr>
+                            <th><i class="fas fa-user me-2"></i>ชื่อ-สกุล</th>
+                            <th><i class="fas fa-id-badge me-2"></i>ตำแหน่งที่สมัคร</th>
+                            <th><i class="fas fa-info-circle me-2"></i>สถานะการสมัครงาน</th>
+                            <th><i class="fas fa-cog me-2"></i>จัดการ</th>
+                        </tr>
+                    </thead>
+
+                    <!--ข้อมูลการสมัครงาน-->
+                    <tbody>
+                        {% for application in applications %}
+                        <tr>
+                            <td>{{ application.first_name }} {{ application.last_name }}</td>
+                            <td>{{ application.position_applied }}</td>
+                            <td>
+                               
+                                {% if application.application_status == 'waiting' %}
+                                <span class="status-pending badge bg-warning text-dark">
+                                  <i class="fas fa-clock me-1"></i>{{ application.get_application_status_display }}
+                                </span>
+                              
+                              {% elif application.application_status == 'hired' %}
+                                <span class="status-approved badge bg-success">
+                                  <i class="fas fa-check-circle me-1"></i>{{ application.get_application_status_display }}
+                                </span>
+                              
+                              {% elif application.application_status == 'interviewed' %}
+                                <span class="status-interviewed badge bg-info text-dark">
+                                  <i class="fas fa-user-check me-1"></i>{{ application.get_application_status_display }}
+                                </span>
+                              
+                              {% elif application.application_status == 'not_passed' %}
+                                <span class="status-rejected badge bg-danger">
+                                  <i class="fas fa-times-circle me-1"></i>{{ application.get_application_status_display }}
+                                </span>
+                              
+                              {% else %}
+                                <span class="badge bg-secondary">ไม่ทราบสถานะ</span>
+                              {% endif %}
+                              
+                            </td>
+
+                            <td>
+                                <a href="{% url 'edit_application' application.pk %}" class="btn btn-sm btn-outline-success me-1" title="แก้ไข">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'delete_application' application.pk %}" class="btn btn-sm btn-outline-danger" 
+                                   onclick="return confirm('คุณต้องการลบผู้สมัครงานนี้หรือไม่?')" title="ลบ">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">
+                                <i class="fas fa-exclamation-circle me-2"></i>ไม่พบข้อมูลผู้สมัครงาน
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <!-- แบ่งหน้า -->
+                {% if applications.has_other_pages %}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if applications.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ applications.previous_page_number }}">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">&laquo;</span>
+                        </li>
+                        {% endif %}
+                        
+                        {% for i in applications.paginator.page_range %}
+                            {% if applications.number == i %}
+                            <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                            {% else %}
+                            <li class="page-item"><a class="page-link" href="{{ i }}">{{ i }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if applications.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ applications.next_page_number }}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">&raquo;</span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+
+<!-- Style Css-->    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 20px;
+            padding-bottom: 50px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #3498db 0%,  100%);
+            color: white;
+            padding: 25px 0;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+/*ปุ่มทางเลือก*/        
+    .search-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%; /* เปลี่ยนเป็นวงกลมสมบูรณ์ */
+    background:  #3498db; /* สีฟ้าเข้ม */
+    box-shadow:  3px 3px 6px #90caf9,
+                -3px -3px 6px #bbdefb;
+    border: none;
+    color: white; /* เปลี่ยนสีไอคอนเป็นขาว */
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-btn:hover {
+    transform: translateY(-2px) scale(1.08);
+    box-shadow:  5px 5px 12px #81d4fa,
+                -5px -5px 12px #b3e5fc;
+    background:  #3498db
+}
+
+.search-btn:active {
+    transform: scale(0.95);
+    box-shadow: inset 2px 2px 4px  #3498db,
+                inset -2px -2px 4px #64b5f6;
+}
+
+.search-btn i {
+    font-size: 1.2rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+        .table-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.05);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .btn-add {
+            padding: 8px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px #3498db;
+        }
+        
+        .status-pending.badge {
+            background-color: #fff3cd !important;
+            color: #664d03 !important;
+        }
+        
+        .status-approved.badge {
+            background-color: #d1e7dd !important;
+            color: #0a3622 !important;
+        }
+        
+        .status-rejected.badge {
+            background-color: #f8d7da !important;
+            color: #58151c !important;
+        }
+        
+        .table th {
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .table td {
+            vertical-align: middle;
+        }
+        
+        .pagination .page-item.active .page-link {
+            background-color: #3498db;
+            border-color: #3498db;
+        }
+        
+        .pagination .page-link {
+            color: #3498db;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .table-container {
+                padding: 15px;
+            }
+            
+            .d-flex.justify-content-between {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .input-group {
+                width: 100% !important;
+            }
+        }
+    </style>
+{% endblock %}
