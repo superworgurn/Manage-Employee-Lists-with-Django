@@ -33,9 +33,8 @@ class person(models.Model):
     experience = models.TextField("ประสบการณ์ (Experience)")
     application_status = models.CharField("สถานะใบสมัคร (Status)",max_length=11,
                                           choices=STATUS_CHOICES , default='waiting')
-    experience = models.TextField("ประสบการณ์ (Experience)")
-    application_status = models.CharField("สถานะใบสมัคร (Status)",max_length=11,
-                                           choices=STATUS_CHOICES , default='waiting')
 
+    
     def __str__(self):
         return f'{self.first_name} {self.last_name} - {self.position_applied}'
+    
